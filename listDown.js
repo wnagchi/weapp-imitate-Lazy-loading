@@ -1,11 +1,19 @@
+/*
+*加载效果相关js
+*/
+
+
 let  getImages=(arr,obj)=>{
   for (let i = 0; i < arr.length; i++) {
     if (typeof arr[i][0] == "object") {
         getImages(arr[i], obj)
     } else {
-      arr[i].clas = 'product_image';
-      arr[i].uid = 'pad' + obj.data.productNum;
-      obj.setData({ productNum: obj.data.productNum + 1 })
+        arr[i].clas = 'product_image';
+        let num = Math.random();
+        let date = new Date();
+        date = date.getTime();//得到时间的13位毫秒数
+        arr[i].uid = 'pad' + date;
+        obj.setData({ productNum: obj.data.productNum + 1 })
     }
   }
 }
@@ -17,12 +25,12 @@ let getImagesHeight=(arr,obj)=>{
         getImagesHeight(arr[i], obj)
     } else {
       if (arr[i].uid) {
-          console.log(arr[i].uid)
+         // console.log(arr[i].uid)
         let text = "#" + arr[i].uid;     
         let query = wx.createSelectorQuery();
         query.select(text).boundingClientRect()
         query.exec(function (res) {
-            console.log(res)
+          //  console.log(res)
           if (res[0] != null) {
             arr[i].offHeight = res[0].top;
             arr[i].addHeight = res[0].height
@@ -43,7 +51,7 @@ let getNewImage=(listName,obj)=>{
   for (let i in listName) {
     arr.push(that.data[listName[i]])
   }
-  console.log(arr)
+  //console.log(arr)
   that.setData({ productNum: 0, listName: listName });
   
   let getImg = getImages(arr,that);
@@ -66,15 +74,15 @@ let imgs = (arr, e, that, offTop)=>{
         if (typeof arr[i][0] == "object") {
             imgs(arr[i], e, that, offTop);
         } else {
-            //console.log((e.detail.scrollTop + that.data.scrollHeight - offTop), arr[i].offHeight-arr[i].addHeight)
-            // console.log(
-            //   "e.detail.scrollTop:"+e.detail.scrollTop+"\n",
-            //   "that.data.scrollHeight:"+that.data.scrollHeight+"\n",
-            //   "offTop:"+offTop+"\n",
-            //   "arr[i].addHeight:"+arr[i].addHeight+"\n",
-            //   "arr[i].offHeight"+arr[i].offHeight+"\n",
-            //   "i:"+i,
-            //   )
+            console.log((e.detail.scrollTop + that.data.scrollHeight - offTop), arr[i].offHeight-arr[i].addHeight)
+            console.log(
+              "e.detail.scrollTop:"+e.detail.scrollTop+"\n",
+              "that.data.scrollHeight:"+that.data.scrollHeight+"\n",
+              "offTop:"+offTop+"\n",
+              "arr[i].addHeight:"+arr[i].addHeight+"\n",
+              "arr[i].offHeight"+arr[i].offHeight+"\n",
+              "i:"+i,
+              )
               //console.log((e.detail.scrollTop +e.detail.scrollHeight - offTop) >= (arr[i].offHeight - arr[i].addHeight))
             if ((e.detail.scrollTop + that.data.scrollHeight - offTop) >= arr[i].offHeight - arr[i].addHeight) {
                // console.log(i)
@@ -96,9 +104,9 @@ let imgs = (arr, e, that, offTop)=>{
                }
                 
             }
-            // else{
-            //   arr[i].clas = 'product_image';
-            // }
+            else{//是否反向隐藏
+              arr[i].clas = 'product_image';
+            }
         }
     }
     
@@ -130,11 +138,65 @@ let imageShow3=(e,obj,offTop=0)=>{
     that.setData({ [listName[i]]: arr[i] })
   }
 }
-
+// arr={
+//     e:e,
+//     arrName:'data对象名',
+//     className:'class名',
+//     that:this,
+//     bottom:'距离下边多少时候开始出现',
+//     isReverse:true/false
+// }
+let imgNow = (arr)=>{
+    const newArr={
+        e:arr.e||false,
+        arrName: arr.arrName,
+        className:arr.className,
+        that:arr.that,
+        bottom:arr.bottom||0,
+        isReverse: arr.isReverse||false
+    }
+   
+    let exploreList = newArr.that.data[newArr.arrName]
+    if (!newArr.that.data.windowHeight) {
+        wx.getSystemInfo({
+            success: function (res) {
+                newArr.that.setData({
+                    windowHeight: res.windowHeight
+                })
+            },
+        });
+    }
+    let windowHeight = newArr.that.data.windowHeight
+    wx.createSelectorQuery().selectAll('.' + newArr.className).boundingClientRect((ret) => {
+        ret.forEach((item, index) => {
+            if (item.top <= windowHeight - newArr.bottom) {
+                if (!newArr.e){
+                    //debugger
+                    setTimeout(()=>{
+                        exploreList[index].isOpa = true;
+                        newArr.that.setData({
+                            [newArr.arrName]: exploreList
+                        })
+                    },150*index)
+                }else{ 
+                        exploreList[index].isOpa = true
+                    }
+            } else {
+                if (newArr.isReverse) {
+                    exploreList[index].isOpa = false
+                }
+            }
+        })
+        newArr.that.setData({
+            [newArr.arrName]: exploreList
+        })
+    }).exec()
+}
 
 module.exports = {
   getNewImage: getNewImage,
-  imageShow3: imageShow3
+  imageShow3: imageShow3,
+  newImg: imgNow
 };
 
 
