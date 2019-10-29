@@ -1,4 +1,66 @@
-### 2019-10-24 
+## 2019-10-29更新
+
+###  由于初始化时小程序接口获取到的top值不准确改用以下
+
+### js引入
+```javascript
+  imgNow:function(e){
+      listdown.newImg({
+          e:e,   
+          arrName:'exploreList',  //data对象名
+          className:'explore_list_ad', //循环的class名
+          that:this,
+          bottom:50, //距离下边多少时开始出现
+          isReverse:true //是否反向效果
+      })
+ 
+  }
+  
+  //初始化：
+       let add=setInterval(()=>{
+         if (this.data.exploreList.length>0){
+            this.imgNow();
+             clearInterval(add)
+        }
+     },500)
+//this.data.exploreList：要处理的对象
+```
+### wxml引入
+```html
+  <view class='explore_list_ad  product_image {{item.isOpa?"loaded":" "}}' wx:for='{{maintenanceCateList}}' wx:key='key'>
+
+```
+### wxss引入
+```css
+.product_image{  /* 加载之前的样式  */
+  opacity: 0;
+  transition: .3s;
+  transform: translateY(30rpx) scale(.9)
+}
+.loaded{ /* 加载之后的样式  */
+    opacity: 1;
+    transition: .5s;
+    transform: translateY(0) scale(1)
+}
+```
+
+
+
+
+
+
+
+
+
+------
+
+
+
+
+
+
+
+## 2019-10-24 
 
 ### 如果页面中存在图片 并且非固定高度
 
